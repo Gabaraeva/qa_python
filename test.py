@@ -5,30 +5,6 @@ def test_add_new_book():
     collector = BooksCollector()
     collector.add_new_book("Маленький принц")
     assert "Маленький принц" in collector.books_genre
-def test_get_book_genre_positive():
-    collector = BooksCollector()
-    collector.add_new_book("Мастер и Маргарита")
-    collector.set_book_genre("Мастер и Маргарита", "Фантастика")
-    assert collector.get_book_genre("Мастер и Маргарита") == "Фантастика"
-
-def test_get_books_genre_positive():
-    collector = BooksCollector()
-    collector.add_new_book("Преступление и наказание")
-    collector.add_new_book("Война и мир")
-    collector.set_book_genre("Преступление и наказание", "Детективы")
-    expected = {
-        "Преступление и наказание": "Детективы",
-        "Война и мир": ""
-    }
-    assert collector.get_books_genre() == expected
-
-def test_get_list_of_favorites_books_positive():
-    collector = BooksCollector()
-    books = ["Книга 1", "Книга 2", "Книга 3"]
-    for book in books:
-        collector.add_new_book(book)
-        collector.add_book_in_favorites(book)
-    assert collector.get_list_of_favorites_books() == books
 
 def test_cant_add_same_book_twice():
     collector = BooksCollector()
@@ -89,5 +65,28 @@ def test_delete_book_from_favorites():
 def test_cant_add_book_with_invalid_name(name):
     collector = BooksCollector()
     collector.add_new_book(name)
-    assert name not in collector.books_genre  
+    assert name not in collector.books_genre
+def test_get_book_genre_positive():
+    collector = BooksCollector()
+    collector.add_new_book("Мастер и Маргарита")
+    collector.set_book_genre("Мастер и Маргарита", "Фантастика")
+    assert collector.get_book_genre("Мастер и Маргарита") == "Фантастика"
 
+def test_get_books_genre_positive():
+    collector = BooksCollector()
+    collector.add_new_book("Преступление и наказание")
+    collector.add_new_book("Война и мир")
+    collector.set_book_genre("Преступление и наказание", "Детективы")
+    expected = {
+        "Преступление и наказание": "Детективы",
+        "Война и мир": ""
+    }
+    assert collector.get_books_genre() == expected
+
+def test_get_list_of_favorites_books_positive():
+    collector = BooksCollector()
+    books = ["Книга 1", "Книга 2", "Книга 3"]
+    for book in books:
+        collector.add_new_book(book)
+        collector.add_book_in_favorites(book)
+    assert collector.get_list_of_favorites_books() == books
