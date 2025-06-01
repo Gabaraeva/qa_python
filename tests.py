@@ -66,7 +66,10 @@ def test_cant_add_book_with_invalid_name(name):
     collector = BooksCollector()
     collector.add_new_book(name)
     assert name not in collector.books_genre
-    def test_get_book_genre_positive():
+
+# ===== ДОБАВЛЕННЫЕ ТЕСТЫ =====
+
+def test_get_book_genre_positive():
     collector = BooksCollector()
     collector.add_new_book("Мастер и Маргарита")
     collector.set_book_genre("Мастер и Маргарита", "Фантастика")
