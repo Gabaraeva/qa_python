@@ -65,7 +65,10 @@ def test_delete_book_from_favorites():
 def test_cant_add_book_with_invalid_name(name):
     collector = BooksCollector()
     collector.add_new_book(name)
-    assert name not in collector.books_genre
+     assert name not in collector.books_genre  # <- здесь пробел убран
+
+# ===== ДОБАВЛЕННЫЕ ТЕСТЫ =====  # <- добавьте эту пустую строку и комментарий
+
 def test_get_book_genre_positive():
     collector = BooksCollector()
     collector.add_new_book("Мастер и Маргарита")
