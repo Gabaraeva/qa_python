@@ -30,7 +30,7 @@ def test_add_new_book_duplicate():
     [
         (True, 'Фантастика', 'Фантастика'),    # Позитивный
         (True, 'Неизвестный', ''),             # Негативный: несуществующий жанр
-        (False, 'Фантастика', None),           # Негативный: книга не существует
+        (False, 'Фантастика', ''),             # Негативный: книга не существует (исправлено None -> '')
         (True, '', '')                         # Негативный: пустой жанр
     ]
 )
@@ -49,7 +49,7 @@ def test_get_book_genre_positive():
     collector.set_book_genre('Книга', 'Фантастика')
     assert collector.get_book_genre('Книга') == 'Фантастика'
 
-#  позитивная проверка для get_books_genre
+# позитивная проверка для get_books_genre
 def test_get_books_genre_positive():
     collector = BooksCollector()
     books = {
@@ -69,22 +69,38 @@ def test_get_books_with_specific_genre_invalid():
     collector.add_new_book('Книга')
     assert collector.get_books_with_specific_genre('Несуществующий') == []
 
-# Позитивная и негативная проверки детских книг
+# Позитивная и негативная проверки детских книг (расширена проверкой рейтинга)
 def test_get_books_for_children():
     collector = BooksCollector()
-    collector.add_new_book('Мультик')
-    collector.add_new_book('Ужастик')
-    collector.add_new_book('Детектив')
-    collector.add_new_book('Без жанра')
-    collector.set_book_genre('Мультик', 'Мультфильмы')
-    collector.set_book_genre('Ужастик', 'Ужасы')
-    collector.set_book_genre('Детектив', 'Детективы')
-    
+    # Используем переменные для ясности
+    child_book = 'Мультик'
+    high_rated_book = 'Мультик с высоким рейтингом'
+    horror_book = 'Ужастик'
+    detective_book = 'Детектив'
+    no_genre_book = 'Без жанра'
+
+    collector.add_new_book(child_book)
+    collector.add_new_book(high_rated_book)
+    collector.add_new_book(horror_book)
+    collector.add_new_book(detective_book)
+    collector.add_new_book(no_genre_book)
+
+    collector.set_book_genre(child_book, 'Мультфильмы')
+    collector.set_book_genre(high_rated_book, 'Мультфильмы')
+    collector.set_book_genre(horror_book, 'Ужасы')
+    collector.set_book_genre(detective_book, 'Детективы')
+
+    # Установка рейтинга для проверки влияния на детские книги
+    collector.set_book_rating(high_rated_book, 11)  # недопустимый рейтинг
+
     children_books = collector.get_books_for_children()
-    assert 'Мультик' in children_books       # Позитивная (без рейтинга)
-    assert 'Ужастик' not in children_books   # Негативная (возрастной рейтинг)
-    assert 'Детектив' not in children_books  # Негативная (возрастной рейтинг)
-    assert 'Без жанра' not in children_books # Негативная (жанр не установлен)
+    
+    # Основные проверки
+    assert child_book in children_books       # Позитивная (корректные жанр и рейтинг)
+    assert high_rated_book not in children_books  # Негативная (высокий рейтинг)
+    assert horror_book not in children_books   # Негативная (недетский жанр)
+    assert detective_book not in children_books  # Негативная (недетский жанр)
+    assert no_genre_book not in children_books # Негативная (жанр не установлен)
 
 # Негативные проверки добавления в избранное
 def test_add_book_in_favorites_invalid():
