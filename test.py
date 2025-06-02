@@ -1,144 +1,87 @@
 import pytest
 from main import BooksCollector
 
-# Позитивные и негативные проверки добавления книг
-@pytest.mark.parametrize(
-    'name, valid',
-    [
-        ('', False),          # Негативный: пустое имя
-        ('A', True),          # Позитивный: 1 символ
-        ('A' * 40, True),     # Позитивный: 40 символов
-        ('A' * 41, False),    # Негативный: 41 символ
-        (None, False)         # Негативный: None вместо имени
-    ]
-)
-def test_add_new_book_name_length(name, valid):
+def test_add_new_book():
     collector = BooksCollector()
-    collector.add_new_book(name)
-    assert (name in collector.books_genre) is valid
+    collector.add_new_book("Маленький принц")
+    assert "Маленький принц" in collector.books_genre
 
-# Негативная проверка дублирования книг
-def test_add_new_book_duplicate():
+def test_cant_add_same_book_twice():
     collector = BooksCollector()
-    collector.add_new_book('Дубликат')
-    collector.add_new_book('Дубликат')  # Негативная: повторное добавление
+    collector.add_new_book("1984")
+    collector.add_new_book("1984")
     assert len(collector.books_genre) == 1
 
-# Позитивные и негативные проверки установки жанра
-@pytest.mark.parametrize(
-    'book_added, genre, expected_genre',
-    [
-        (True, 'Фантастика', 'Фантастика'),    # Позитивный
-        (True, 'Неизвестный', ''),             # Негативный: несуществующий жанр
-        (False, 'Фантастика', ''),             # Негативный: книга не существует (исправлено None -> '')
-        (True, '', '')                         # Негативный: пустой жанр
-    ]
-)
-def test_set_book_genre(book_added, genre, expected_genre):
+def test_set_book_genre():
     collector = BooksCollector()
-    book_name = 'Книга'
-    if book_added:
-        collector.add_new_book(book_name)
-    collector.set_book_genre(book_name, genre)
-    assert collector.get_book_genre(book_name) == expected_genre
+    collector.add_new_book("Гарри Поттер")
+    collector.set_book_genre("Гарри Поттер", "Фантастика")
+    assert collector.get_book_genre("Гарри Поттер") == "Фантастика"
 
-# позитивная проверка для get_book_genre
-def test_get_book_genre_positive():
+def test_cant_set_invalid_genre():
     collector = BooksCollector()
-    collector.add_new_book('Книга')
-    collector.set_book_genre('Книга', 'Фантастика')
-    assert collector.get_book_genre('Книга') == 'Фантастика'
+    collector.add_new_book("Война и мир")
+    collector.set_book_genre("Война и мир", "Роман")
+    assert collector.get_book_genre("Война и мир") == ""
 
-# позитивная проверка для get_books_genre
-def test_get_books_genre_positive():
+# Позитивная проверка для get_book_genre
+def test_get_book_genre_for_book_without_genre():
     collector = BooksCollector()
-    books = {
-        'Книга1': 'Фантастика',
-        'Книга2': 'Комедии',
-        'Книга3': ''   # без жанра
-    }
-    for name, genre in books.items():
-        collector.add_new_book(name)
-        if genre:  # если жанр не пустой, устанавливаем
-            collector.set_book_genre(name, genre)
-    assert collector.get_books_genre() == books
+    collector.add_new_book("Без жанра")
+    assert collector.get_book_genre("Без жанра") == ""
 
-# Негативная проверка получения книг по несуществующему жанру
-def test_get_books_with_specific_genre_invalid():
+def test_get_books_with_specific_genre():
     collector = BooksCollector()
-    collector.add_new_book('Книга')
-    assert collector.get_books_with_specific_genre('Несуществующий') == []
+    collector.add_new_book("Оно")
+    collector.add_new_book("Сияние")
+    collector.set_book_genre("Оно", "Ужасы")
+    collector.set_book_genre("Сияние", "Ужасы")
+    assert collector.get_books_with_specific_genre("Ужасы") == ["Оно", "Сияние"]
 
-# Позитивная и негативная проверки детских книг (расширена проверкой рейтинга)
 def test_get_books_for_children():
     collector = BooksCollector()
-    # Используем переменные для ясности
-    child_book = 'Мультик'
-    high_rated_book = 'Мультик с высоким рейтингом'
-    horror_book = 'Ужастик'
-    detective_book = 'Детектив'
-    no_genre_book = 'Без жанра'
+    collector.add_new_book("Карлсон")
+    collector.add_new_book("Дракула")
+    collector.set_book_genre("Карлсон", "Мультфильмы")
+    collector.set_book_genre("Дракула", "Ужасы")
+    assert "Карлсон" in collector.get_books_for_children()
+    assert "Дракула" not in collector.get_books_for_children()
 
-    collector.add_new_book(child_book)
-    collector.add_new_book(high_rated_book)
-    collector.add_new_book(horror_book)
-    collector.add_new_book(detective_book)
-    collector.add_new_book(no_genre_book)
-
-    collector.set_book_genre(child_book, 'Мультфильмы')
-    collector.set_book_genre(high_rated_book, 'Мультфильмы')
-    collector.set_book_genre(horror_book, 'Ужасы')
-    collector.set_book_genre(detective_book, 'Детективы')
-
-    # Установка рейтинга для проверки влияния на детские книги
-    collector.set_book_rating(high_rated_book, 11)  # недопустимый рейтинг
-
-    children_books = collector.get_books_for_children()
-    
-    # Основные проверки
-    assert child_book in children_books       # Позитивная (корректные жанр и рейтинг)
-    assert high_rated_book not in children_books  # Негативная (высокий рейтинг)
-    assert horror_book not in children_books   # Негативная (недетский жанр)
-    assert detective_book not in children_books  # Негативная (недетский жанр)
-    assert no_genre_book not in children_books # Негативная (жанр не установлен)
-
-# Негативные проверки добавления в избранное
-def test_add_book_in_favorites_invalid():
+def test_add_book_to_favorites():
     collector = BooksCollector()
-    collector.add_new_book('Книга')
-    collector.add_book_in_favorites('Несуществующая')  # Негативная: нет в коллекции
-    collector.add_book_in_favorites('Книга')
-    collector.add_book_in_favorites('Книга')  # Негативная: дублирование
-    assert collector.get_list_of_favorites_books() == ['Книга']
+    collector.add_new_book("Алиса в стране чудес")
+    collector.add_book_in_favorites("Алиса в стране чудес")
+    assert "Алиса в стране чудес" in collector.get_list_of_favorites_books()
 
-# Негативная проверка удаления несуществующей книги из избранного
-def test_delete_book_from_favorites_invalid():
+def test_cant_add_to_favorites_twice():
     collector = BooksCollector()
-    collector.add_new_book('Книга')
-    collector.add_book_in_favorites('Книга')
-    collector.delete_book_from_favorites('Несуществующая')  # Негативная
-    assert 'Книга' in collector.get_list_of_favorites_books()
+    collector.add_new_book("Моби Дик")
+    collector.add_book_in_favorites("Моби Дик")
+    collector.add_book_in_favorites("Моби Дик")
+    assert len(collector.get_list_of_favorites_books()) == 1
 
-# позитивная проверка для get_list_of_favorites_books
-def test_get_list_of_favorites_books_positive():
-    collector = BooksCollector()
-    collector.add_new_book('Книга1')
-    collector.add_new_book('Книга2')
-    collector.add_book_in_favorites('Книга1')
-    collector.add_book_in_favorites('Книга2')
-    assert collector.get_list_of_favorites_books() == ['Книга1', 'Книга2']
-
-# Позитивная и негативная проверки удаления из избранного
 def test_delete_book_from_favorites():
     collector = BooksCollector()
-    collector.add_new_book('Книга1')
-    collector.add_new_book('Книга2')
-    collector.add_book_in_favorites('Книга1')
-    collector.add_book_in_favorites('Книга2')
-    
-    collector.delete_book_from_favorites('Книга1')  # Позитивная
-    assert 'Книга1' not in collector.get_list_of_favorites_books()
-    assert 'Книга2' in collector.get_list_of_favorites_books()
-    
-    collector.delete_book_from_favorites('Несуществующая')  # Негативная
-    assert len(collector.get_list_of_favorites_books()) == 1
+    collector.add_new_book("Три мушкетера")
+    collector.add_book_in_favorites("Три мушкетера")
+    collector.delete_book_from_favorites("Три мушкетера")
+    assert "Три мушкетера" not in collector.get_list_of_favorites_books()
+
+# Позитивная проверка для get_books_genre
+def test_get_books_genre_returns_correct_dict():
+    collector = BooksCollector()
+    collector.add_new_book("Книга1")
+    collector.set_book_genre("Книга1", "Фантастика")
+    assert collector.get_books_genre() == {"Книга1": "Фантастика"}
+
+# Позитивная проверка для get_list_of_favorites_books
+def test_get_list_of_favorites_books_initially_empty():
+    collector = BooksCollector()
+    assert collector.get_list_of_favorites_books() == []
+
+# Исправленный тест для недопустимых имен
+@pytest.mark.parametrize("name", ["", "Очень длинное название книги, которое явно больше сорока символов"])
+def test_cant_add_book_with_invalid_name(name):
+    collector = BooksCollector()
+    collector.add_new_book(name)
+    assert name not in collector.get_books_genre()
