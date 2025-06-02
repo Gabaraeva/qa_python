@@ -42,14 +42,14 @@ def test_set_book_genre(book_added, genre, expected_genre):
     collector.set_book_genre(book_name, genre)
     assert collector.get_book_genre(book_name) == expected_genre
 
-# Явная позитивная проверка для get_book_genre
+# позитивная проверка для get_book_genre
 def test_get_book_genre_positive():
     collector = BooksCollector()
     collector.add_new_book('Книга')
     collector.set_book_genre('Книга', 'Фантастика')
     assert collector.get_book_genre('Книга') == 'Фантастика'
 
-# Явная позитивная проверка для get_books_genre
+#  позитивная проверка для get_books_genre
 def test_get_books_genre_positive():
     collector = BooksCollector()
     books = {
