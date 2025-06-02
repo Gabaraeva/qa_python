@@ -103,7 +103,7 @@ def test_delete_book_from_favorites_invalid():
     collector.delete_book_from_favorites('Несуществующая')  # Негативная
     assert 'Книга' in collector.get_list_of_favorites_books()
 
-# Явная позитивная проверка для get_list_of_favorites_books
+# позитивная проверка для get_list_of_favorites_books
 def test_get_list_of_favorites_books_positive():
     collector = BooksCollector()
     collector.add_new_book('Книга1')
