@@ -18,7 +18,7 @@ class BooksCollector:
 
     # получаем жанр книги по её имени
     def get_book_genre(self, name):
-        return self.books_genre.copy(name)
+        return self.books_genre.get(name)
 
     # выводим список книг с определённым жанром
     def get_books_with_specific_genre(self, genre):
